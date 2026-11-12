@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:app_1/core/theme/app_theme.dart';
 import 'package:app_1/models/dhikr_item.dart';
 import 'package:app_1/services/app_store.dart';
@@ -8,6 +9,21 @@ class DhikrCard extends StatelessWidget {
   final AppStore store;
 
   const DhikrCard({super.key, required this.item, required this.store});
+
+  void _copyToClipboard(BuildContext context) {
+    final formatted =
+        '${item.title}\n\n${item.text}\n\nالمصدر: ${item.source}\n(عبر تطبيق رفيق الأذكار)';
+    Clipboard.setData(ClipboardData(text: formatted));
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('تم نسخ الذكر إلى الحافظة بنجاح'),
+        duration: Duration(seconds: 2),
+        backgroundColor: brandGreen,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +51,11 @@ class DhikrCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                    ),
+                    IconButton(
+                      tooltip: 'مشاركة ونسخ الذكر',
+                      onPressed: () => _copyToClipboard(context),
+                      icon: const Icon(Icons.share_outlined, size: 21),
                     ),
                     IconButton(
                       tooltip: 'إضافة إلى المفضلة',

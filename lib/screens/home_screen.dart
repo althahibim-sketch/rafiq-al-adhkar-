@@ -6,6 +6,7 @@ import 'package:app_1/screens/favorites_screen.dart';
 import 'package:app_1/screens/progress_screen.dart';
 import 'package:app_1/screens/tasbeeh_screen.dart';
 import 'package:app_1/services/app_store.dart';
+import 'package:app_1/widgets/dhikr_search_delegate.dart';
 
 class HomePage extends StatelessWidget {
   final AppStore store;
@@ -196,6 +197,14 @@ class HomePage extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           actions: [
+            IconButton(
+              tooltip: 'بحث في الأذكار',
+              icon: const Icon(Icons.search),
+              onPressed: () => showSearch(
+                context: context,
+                delegate: DhikrSearchDelegate(store: store),
+              ),
+            ),
             IconButton(
               tooltip: 'المظهر',
               icon: Icon(

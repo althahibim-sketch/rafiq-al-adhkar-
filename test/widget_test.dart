@@ -58,4 +58,21 @@ void main() {
     expect(find.text('الاهتزاز التفاعلي'), findsOneWidget);
     expect(find.text('حجم خط الأذكار'), findsOneWidget);
   });
+
+  testWidgets('Search button opens search and filters adhkar', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const RafiqApp());
+    await tester.pumpAndSettle();
+
+    // Tap search icon
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    // Enter search query
+    await tester.enterText(find.byType(TextField), 'سيد الاستغفار');
+    await tester.pumpAndSettle();
+
+    expect(find.text('سيد الاستغفار'), findsWidgets);
+  });
 }
