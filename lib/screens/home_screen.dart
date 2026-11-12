@@ -15,8 +15,112 @@ class HomePage extends StatelessWidget {
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
+  void _showSettingsModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AnimatedBuilder(
+            animation: store,
+            builder: (context, _) => Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.tune, color: brandGreen),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'إعدادات التطبيق',
+                        style: TextStyle(
+                            fontSize: 19, fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.palette_outlined, color: brandGreen),
+                    title: const Text('المظهر (الوضع الليلي)'),
+                    subtitle: Text(
+                      store.themeMode == ThemeMode.dark
+                          ? 'الوضع الداكن'
+                          : (store.themeMode == ThemeMode.light
+                              ? 'الوضع الفاتح'
+                              : 'تلقائي (حسب النظام)'),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        store.themeMode == ThemeMode.dark
+                            ? Icons.dark_mode
+                            : (store.themeMode == ThemeMode.light
+                                ? Icons.light_mode
+                                : Icons.brightness_auto),
+                        color: brandGreen,
+                      ),
+                      onPressed: store.toggleThemeMode,
+                    ),
+                  ),
+                  SwitchListTile(
+                    secondary:
+                        const Icon(Icons.vibration, color: brandGreen),
+                    title: const Text('الاهتزاز التفاعلي'),
+                    subtitle: const Text('اهتزاز خفيف عند التسبيح والعد'),
+                    value: store.hapticEnabled,
+                    activeThumbColor: brandGreen,
+                    onChanged: (_) => store.toggleHaptic(),
+                  ),
+                  ListTile(
+                    leading:
+                        const Icon(Icons.format_size, color: brandGreen),
+                    title: const Text('حجم خط الأذكار'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          onPressed: store.fontSizeDelta <= -2.0
+                              ? null
+                              : () => store.changeFontSize(-1.0),
+                        ),
+                        Text(
+                          '${(store.fontSizeDelta + 21).toInt()}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          onPressed: store.fontSizeDelta >= 6.0
+                              ? null
+                              : () => store.changeFontSize(1.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final sections = [
       _Section(
         'أذكار الصباح',
@@ -91,30 +195,53 @@ class HomePage extends StatelessWidget {
             'رفيق الأذكار',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
+          actions: [
+            IconButton(
+              tooltip: 'المظهر',
+              icon: Icon(
+                store.themeMode == ThemeMode.dark
+                    ? Icons.dark_mode
+                    : (store.themeMode == ThemeMode.light
+                        ? Icons.light_mode
+                        : Icons.brightness_auto),
+              ),
+              onPressed: store.toggleThemeMode,
+            ),
+            IconButton(
+              tooltip: 'الإعدادات',
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => _showSettingsModal(context),
+            ),
+          ],
         ),
         body: SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(18),
             children: [
-              const Text(
+              Text(
                 'السلام عليكم ورحمة الله',
                 style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF20352F),
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 7),
               Text(
                 'اجعل لسانك عامراً بذكر الله',
-                style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                ),
               ),
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [brandGreen, Color(0xFF238875)],
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [const Color(0xFF14473C), const Color(0xFF1A5A4D)]
+                        : [brandGreen, const Color(0xFF238875)],
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                   ),
@@ -157,7 +284,10 @@ class HomePage extends StatelessWidget {
                   ),
                   Text(
                     '٧ أقسام',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),

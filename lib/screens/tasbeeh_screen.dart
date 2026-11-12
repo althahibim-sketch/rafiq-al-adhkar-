@@ -10,11 +10,24 @@ class TasbeehScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('السبحة الإلكترونية')),
-        body: AnimatedBuilder(
-          animation: store,
-          builder: (context, _) => Center(
+      child: AnimatedBuilder(
+        animation: store,
+        builder: (context, _) => Scaffold(
+          appBar: AppBar(
+            title: const Text('السبحة الإلكترونية'),
+            actions: [
+              IconButton(
+                tooltip: store.hapticEnabled
+                    ? 'الاهتزاز مفعل'
+                    : 'الاهتزاز معطل',
+                icon: Icon(
+                  store.hapticEnabled ? Icons.vibration : Icons.mobile_off,
+                ),
+                onPressed: store.toggleHaptic,
+              ),
+            ],
+          ),
+          body: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(22),
               child: Column(

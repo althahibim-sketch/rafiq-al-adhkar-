@@ -20,7 +20,21 @@ class DhikrListScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: AppBar(title: Text(title)),
+        appBar: AppBar(
+          title: Text(title),
+          actions: [
+            IconButton(
+              tooltip: 'تصغير الخط',
+              icon: const Icon(Icons.text_decrease),
+              onPressed: () => store.changeFontSize(-1.0),
+            ),
+            IconButton(
+              tooltip: 'تكبير الخط',
+              icon: const Icon(Icons.text_increase),
+              onPressed: () => store.changeFontSize(1.0),
+            ),
+          ],
+        ),
         body: ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: items.length,

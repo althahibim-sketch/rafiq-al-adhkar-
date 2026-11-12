@@ -11,6 +11,9 @@ class DhikrCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+
     return AnimatedBuilder(
       animation: store,
       builder: (context, _) {
@@ -51,22 +54,32 @@ class DhikrCard extends StatelessWidget {
                 Text(
                   item.text,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 21,
+                  style: TextStyle(
+                    fontSize: 21 + store.fontSizeDelta,
                     height: 1.9,
-                    color: Color(0xFF20352F),
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 12),
                 if (item.note.isNotEmpty)
                   Text(
                     item.note,
-                    style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                    style: TextStyle(
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade700,
+                      fontSize: 13,
+                    ),
                   ),
                 const SizedBox(height: 5),
                 Text(
                   'المصدر: ${item.source}',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  style: TextStyle(
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
                 ),
                 const Divider(height: 25),
                 Row(
@@ -95,7 +108,9 @@ class DhikrCard extends StatelessWidget {
                         ? 0
                         : (count / item.target).clamp(0.0, 1.0).toDouble(),
                     minHeight: 7,
-                    backgroundColor: const Color(0xFFE8EEE9),
+                    backgroundColor: theme.brightness == Brightness.dark
+                        ? const Color(0xFF2A3D36)
+                        : const Color(0xFFE8EEE9),
                     color: completed ? Colors.green : brandGreen,
                   ),
                 ),

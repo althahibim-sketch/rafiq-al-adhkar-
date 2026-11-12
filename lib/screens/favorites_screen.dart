@@ -13,7 +13,21 @@ class FavoritesScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: AppBar(title: const Text('المفضلة')),
+        appBar: AppBar(
+          title: const Text('المفضلة'),
+          actions: [
+            IconButton(
+              tooltip: 'تصغير الخط',
+              icon: const Icon(Icons.text_decrease),
+              onPressed: () => store.changeFontSize(-1.0),
+            ),
+            IconButton(
+              tooltip: 'تكبير الخط',
+              icon: const Icon(Icons.text_increase),
+              onPressed: () => store.changeFontSize(1.0),
+            ),
+          ],
+        ),
         body: AnimatedBuilder(
           animation: store,
           builder: (context, _) {

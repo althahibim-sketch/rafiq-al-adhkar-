@@ -20,17 +20,26 @@ class RafiqApp extends StatefulWidget {
   State<RafiqApp> createState() => _RafiqAppState();
 }
 
-class _RafiqAppState extends State<RafiqApp> {
+class _RafiqAppState extends State<RafiqApp> with WidgetsBindingObserver {
   final AppStore store = AppStore();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     store.load();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      store.checkDateRollover();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     store.dispose();
     super.dispose();
   }
@@ -44,6 +53,8 @@ class _RafiqAppState extends State<RafiqApp> {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: appTheme,
+            darkTheme: appDarkTheme,
+            themeMode: store.themeMode,
             home: const Scaffold(
               body: Center(child: CircularProgressIndicator(color: brandGreen)),
             ),
@@ -53,6 +64,8 @@ class _RafiqAppState extends State<RafiqApp> {
           debugShowCheckedModeBanner: false,
           title: 'رفيق الأذكار',
           theme: appTheme,
+          darkTheme: appDarkTheme,
+          themeMode: store.themeMode,
           home: HomePage(store: store),
         );
       },

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,5 +42,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('Settings modal can be opened from home screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const RafiqApp());
+    await tester.pumpAndSettle();
+
+    // Tap settings icon in AppBar
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('إعدادات التطبيق'), findsOneWidget);
+    expect(find.text('الاهتزاز التفاعلي'), findsOneWidget);
+    expect(find.text('حجم خط الأذكار'), findsOneWidget);
   });
 }
