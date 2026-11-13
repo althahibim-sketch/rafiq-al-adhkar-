@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:app_1/core/theme/app_theme.dart';
 import 'package:app_1/core/utils/hijri_date.dart';
 import 'package:app_1/core/utils/prayer_times.dart';
@@ -187,6 +188,32 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ],
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.info_outline, color: brandGreen),
+                    title: const Text('عن التطبيق ومشاركة الأجر'),
+                    subtitle: const Text(
+                        'برمجة وتطوير: م. محمد الذاهبي والمصادر المعتمدة'),
+                    trailing: const Icon(Icons.arrow_back_ios_new,
+                        size: 14, color: brandGold),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _showAboutModal(context);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: Text(
+                      'برمجة وتطوير: م. محمد الذاهبي • الإصدار 1.0.0',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -194,6 +221,182 @@ class HomePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showAboutModal(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: brandGreen.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child:
+                          const Icon(Icons.mosque, color: brandGreen, size: 26),
+                    ),
+                    const SizedBox(width: 12),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'رفيق الأذكار',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'الإصدار 1.0.0 • رفيق المسلم اليومي',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // بطاقة المطور
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [const Color(0xFF14473C), const Color(0xFF1A5A4D)]
+                          : [const Color(0xFFEAF5F0), const Color(0xFFD6EDE2)],
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: brandGreen.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.code, color: brandGold, size: 22),
+                          const SizedBox(width: 8),
+                          Text(
+                            'برمجة وتطوير: م. محمد الذاهبي',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: isDark ? Colors.white : brandGreen,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '«نسأل الله العلي القدير أن يتقبل هذا العمل خالصاً لوجهه الكريم، وأن يجعله صدقة جارية وينفع به كل من قرأه وعمل به وشاركه»',
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.6,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'المصادر والكتب المعتمدة في الأذكار:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                const SizedBox(height: 8),
+                _sourceItem('صحيح الإمام البخاري رحمه الله'),
+                _sourceItem('صحيح الإمام مسلم رحمه الله'),
+                _sourceItem('كتاب رياض الصالحين للإمام يحيى بن شرف النووي'),
+                _sourceItem(
+                    'كتاب حصن المسلم من أذكار الكتاب والسنة (د. سعيد القحطاني)'),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: brandGreen,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  icon: const Icon(Icons.share, size: 20),
+                  label: const Text(
+                    'مشاركة التطبيق والأجر',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () async {
+                    await Clipboard.setData(
+                      const ClipboardData(
+                        text:
+                            '«مَنْ دَلَّ عَلَى خَيْرٍ فَلَهُ مِثْلُ أَجْرِ فَاعِلِهِ»\n'
+                            'تطبيق (رفيق الأذكار) - أذكار الصباح والمساء والسبحة ومواقيت الصلاة والقبلة.\n'
+                            'برمجة وتطوير: م. محمد الذاهبي\n'
+                            'تطبيق إسلامي مجاني، صدقة جارية، شاركه ولك مثل أجر فاعله بإذن الله.',
+                      ),
+                    );
+                    if (context.mounted) {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'تم نسخ رسالة المشاركة بنجاح، يمكنك مشاركتها الآن'),
+                          backgroundColor: brandGreen,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static Widget _sourceItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_outline, size: 16, color: brandGold),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 13, height: 1.4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
