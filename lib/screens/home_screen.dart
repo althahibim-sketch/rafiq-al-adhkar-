@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:app_1/core/theme/app_theme.dart';
 import 'package:app_1/core/utils/hijri_date.dart';
+import 'package:app_1/core/utils/prayer_times.dart';
 import 'package:app_1/data/adhkar_data.dart';
 import 'package:app_1/screens/custom_adhkar_screen.dart';
 import 'package:app_1/screens/dhikr_list_screen.dart';
 import 'package:app_1/screens/favorites_screen.dart';
+import 'package:app_1/screens/prayer_times_screen.dart';
 import 'package:app_1/screens/progress_screen.dart';
+import 'package:app_1/screens/qibla_screen.dart';
 import 'package:app_1/screens/tasbeeh_screen.dart';
 import 'package:app_1/services/app_store.dart';
 import 'package:app_1/widgets/dhikr_search_delegate.dart';
@@ -303,6 +306,16 @@ class HomePage extends StatelessWidget {
         ),
       ),
       _Section(
+        'مواقيت الصلاة',
+        Icons.access_time_filled,
+        () => open(context, PrayerTimesScreen(store: store)),
+      ),
+      _Section(
+        'اتجاه القبلة',
+        Icons.explore,
+        () => open(context, QiblaScreen(store: store)),
+      ),
+      _Section(
         'أذكاري الخاصة',
         Icons.edit_note,
         () => open(context, CustomAdhkarScreen(store: store)),
@@ -420,7 +433,102 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 14),
+              AnimatedBuilder(
+                animation: store,
+                builder: (context, _) {
+                  final now = DateTime.now();
+                  final prayers =
+                      PrayerTimesCalculator.calculate(now, store.selectedCity);
+                  PrayerTime nextPrayer = prayers.first;
+                  for (final p in prayers) {
+                    if (p.time.isAfter(now)) {
+                      nextPrayer = p;
+                      break;
+                    }
+                  }
+                  final diff = nextPrayer.time.difference(now);
+                  final hours = diff.inHours;
+                  final minutes = diff.inMinutes % 60;
+                  final remainingText = diff.isNegative
+                      ? 'حان وقتها'
+                      : (hours > 0
+                          ? 'متبقي $hours س و $minutes د'
+                          : 'متبقي $minutes دقيقة');
+
+                  return Card(
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: brandGreen.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () =>
+                          open(context, PrayerTimesScreen(store: store)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: brandGreen.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.schedule,
+                                  color: brandGreen, size: 22),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'الصلاة القادمة: ${nextPrayer.arabicName}',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        '(${store.selectedCity.name})',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: isDark
+                                              ? Colors.grey.shade400
+                                              : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${nextPrayer.format12Hour()} • $remainingText',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: brandGold,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.arrow_back_ios_new,
+                                size: 14, color: brandGreen),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 14),
               Row(
                 children: [
                   const Expanded(

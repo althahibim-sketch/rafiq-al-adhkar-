@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:app_1/core/utils/prayer_times.dart';
 import 'package:app_1/data/adhkar_data.dart';
 import 'package:app_1/models/dhikr_item.dart';
 
@@ -14,6 +15,10 @@ class AppStore extends ChangeNotifier {
   int tasbeehCount = 0;
   int dailyCompleted = 0;
   bool ready = false;
+
+  // مواقيت الصلاة والمدينة وسلسلة الأيام
+  CityLocation selectedCity = CityLocation.defaultCities.first;
+  int streakDays = 1;
 
   // إعدادات المظهر والخط والتفاعل
   ThemeMode themeMode = ThemeMode.system;
@@ -58,6 +63,9 @@ class AppStore extends ChangeNotifier {
   static const _morningMinuteKey = 'morning_min_v1';
   static const _eveningHourKey = 'evening_hour_v1';
   static const _eveningMinuteKey = 'evening_min_v1';
+  static const _cityKey = 'selected_city_name_v1';
+  static const _streakKey = 'streak_days_v1';
+  static const _lastStreakDateKey = 'last_streak_date_v1';
 
   String get todayKey {
     final now = DateTime.now();
@@ -78,6 +86,16 @@ class AppStore extends ChangeNotifier {
     currentTasbeehPhrase =
         prefs.getString(_tasbeehPhraseKey) ?? defaultTasbeehPhrases.first;
     tasbeehTarget = prefs.getInt(_tasbeehTargetKey) ?? 33;
+    streakDays = prefs.getInt(_streakKey) ?? 1;
+
+    // استرجاع المدينة
+    final cityName = prefs.getString(_cityKey);
+    if (cityName != null) {
+      selectedCity = CityLocation.defaultCities.firstWhere(
+        (c) => c.name == cityName,
+        orElse: () => CityLocation.defaultCities.first,
+      );
+    }
 
     // استرجاع إعدادات التنبيهات
     remindersEnabled = prefs.getBool(_remindersEnabledKey) ?? true;
@@ -132,6 +150,33 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// تحديث سلسلة الأيام المداومة
+  Future<void> _updateStreak() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastDate = prefs.getString(_lastStreakDateKey);
+    final today = todayKey;
+
+    if (lastDate == null) {
+      streakDays = 1;
+      await prefs.setString(_lastStreakDateKey, today);
+      await prefs.setInt(_streakKey, streakDays);
+    } else if (lastDate != today) {
+      final parts = lastDate.split('-').map(int.parse).toList();
+      final lastDateTime = DateTime(parts[0], parts[1], parts[2]);
+      final now = DateTime.now();
+      final todayDate = DateTime(now.year, now.month, now.day);
+      final diff = todayDate.difference(lastDateTime).inDays;
+
+      if (diff == 1) {
+        streakDays++;
+      } else if (diff > 1) {
+        streakDays = 1;
+      }
+      await prefs.setString(_lastStreakDateKey, today);
+      await prefs.setInt(_streakKey, streakDays);
+    }
+  }
+
   /// التحقق التلقائي عند استئناف التطبيق من تغير اليوم وتصفير إنجاز اليوم
   Future<void> checkDateRollover() async {
     final prefs = await SharedPreferences.getInstance();
@@ -181,6 +226,7 @@ class AppStore extends ChangeNotifier {
 
     final isCompleted = next >= item.target;
     _triggerHaptic(heavy: isCompleted);
+    await _updateStreak();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_countsKey, jsonEncode(dhikrCounts));
@@ -201,6 +247,7 @@ class AppStore extends ChangeNotifier {
   Future<void> incrementTasbeeh() async {
     _triggerHaptic();
     tasbeehCount++;
+    await _updateStreak();
 
     if (tasbeehTarget > 0 && tasbeehCount % tasbeehTarget == 0) {
       _triggerHaptic(heavy: true);
@@ -230,6 +277,14 @@ class AppStore extends ChangeNotifier {
     tasbeehTarget = target;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_tasbeehTargetKey, target);
+    notifyListeners();
+  }
+
+  // --- المدينة ومواقيت الصلاة ---
+  Future<void> setCity(CityLocation city) async {
+    selectedCity = city;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_cityKey, city.name);
     notifyListeners();
   }
 
