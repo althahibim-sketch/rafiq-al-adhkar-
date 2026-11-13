@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:app_1/core/theme/app_theme.dart';
 import 'package:app_1/screens/home_screen.dart';
 import 'package:app_1/services/app_store.dart';
+import 'package:app_1/services/notification_service.dart';
 
 export 'package:app_1/core/theme/app_theme.dart';
 export 'package:app_1/data/adhkar_data.dart';
 export 'package:app_1/models/dhikr_item.dart';
 export 'package:app_1/services/app_store.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await NotificationService().init();
+  } catch (_) {}
   runApp(const RafiqApp());
 }
 

@@ -150,9 +150,9 @@ class AppStore extends ChangeNotifier {
     if (!hapticEnabled) return;
     try {
       if (heavy) {
-        HapticFeedback.mediumImpact();
+        HapticFeedback.heavyImpact();
       } else {
-        HapticFeedback.lightImpact();
+        HapticFeedback.vibrate();
       }
     } catch (_) {}
   }

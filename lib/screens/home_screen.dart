@@ -8,6 +8,7 @@ import 'package:app_1/screens/favorites_screen.dart';
 import 'package:app_1/screens/progress_screen.dart';
 import 'package:app_1/screens/tasbeeh_screen.dart';
 import 'package:app_1/services/app_store.dart';
+import 'package:app_1/services/notification_service.dart';
 import 'package:app_1/widgets/dhikr_search_delegate.dart';
 
 class HomePage extends StatelessWidget {
@@ -161,6 +162,27 @@ class HomePage extends StatelessWidget {
                           store.setEveningReminder(picked.hour, picked.minute);
                         }
                       },
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: brandGreen,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        NotificationService().showTestNotification();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('تم إرسال إشعار تجريبي لسماع النغمة والتأكد من التنبيه'),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: brandGreen,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.notifications_active),
+                      label: const Text('تجربة نغمة وإشعار التنبيه الآن'),
                     ),
                   ],
                   const SizedBox(height: 10),
