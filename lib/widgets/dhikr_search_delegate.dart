@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:app_1/core/theme/app_theme.dart';
-import 'package:app_1/data/adhkar_data.dart';
 import 'package:app_1/models/dhikr_item.dart';
 import 'package:app_1/services/app_store.dart';
 import 'package:app_1/widgets/dhikr_card.dart';
@@ -69,12 +68,13 @@ class DhikrSearchDelegate extends SearchDelegate<DhikrItem?> {
 
   Widget _buildList(BuildContext context) {
     final cleanQuery = query.trim().toLowerCase();
-    final results = allAdhkar.where((item) {
+    final results = store.allUserAdhkar.where((item) {
       if (cleanQuery.isEmpty) return true;
       return item.title.toLowerCase().contains(cleanQuery) ||
           item.text.toLowerCase().contains(cleanQuery) ||
           item.source.toLowerCase().contains(cleanQuery) ||
-          item.note.toLowerCase().contains(cleanQuery);
+          item.note.toLowerCase().contains(cleanQuery) ||
+          item.virtue.toLowerCase().contains(cleanQuery);
     }).toList();
 
     if (results.isEmpty) {

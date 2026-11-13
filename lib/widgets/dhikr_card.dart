@@ -25,6 +25,92 @@ class DhikrCard extends StatelessWidget {
     );
   }
 
+  void _showVirtueDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: brandGold),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  item.title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'فضل وثواب هذا الذكر:',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: brandGreen),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                item.virtue,
+                style: const TextStyle(height: 1.6, fontSize: 15),
+              ),
+              if (item.source.isNotEmpty) ...[
+                const Divider(height: 24),
+                Text(
+                  'المصدر والتخريج:\n${item.source}',
+                  style:
+                      TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('إغلاق',
+                  style: TextStyle(
+                      color: brandGreen, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('حذف الذكر المخصص'),
+          content: Text('هل أنت متأكد من حذف "${item.title}" من أذكارك؟'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('إلغاء'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                store.deleteCustomDhikr(item.id);
+              },
+              child: const Text('حذف', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,6 +138,13 @@ class DhikrCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (item.virtue.isNotEmpty)
+                      IconButton(
+                        tooltip: 'فضل وثواب الذكر',
+                        onPressed: () => _showVirtueDialog(context),
+                        icon: const Icon(Icons.info_outline,
+                            size: 21, color: brandGold),
+                      ),
                     IconButton(
                       tooltip: 'مشاركة ونسخ الذكر',
                       onPressed: () => _copyToClipboard(context),
@@ -69,6 +162,13 @@ class DhikrCard extends StatelessWidget {
                             : brandGreen,
                       ),
                     ),
+                    if (item.isCustom)
+                      IconButton(
+                        tooltip: 'حذف الذكر',
+                        onPressed: () => _confirmDelete(context),
+                        icon: const Icon(Icons.delete_outline,
+                            size: 21, color: Colors.red),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 10),

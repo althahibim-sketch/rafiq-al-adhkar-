@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:app_1/core/theme/app_theme.dart';
+import 'package:app_1/core/utils/hijri_date.dart';
 import 'package:app_1/data/adhkar_data.dart';
+import 'package:app_1/screens/custom_adhkar_screen.dart';
 import 'package:app_1/screens/dhikr_list_screen.dart';
 import 'package:app_1/screens/favorites_screen.dart';
 import 'package:app_1/screens/progress_screen.dart';
@@ -19,6 +21,7 @@ class HomePage extends StatelessWidget {
   void _showSettingsModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -27,7 +30,7 @@ class HomePage extends StatelessWidget {
           textDirection: TextDirection.rtl,
           child: AnimatedBuilder(
             animation: store,
-            builder: (context, _) => Padding(
+            builder: (context, _) => SingleChildScrollView(
               padding: const EdgeInsets.all(22),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -51,7 +54,8 @@ class HomePage extends StatelessWidget {
                   ),
                   const Divider(),
                   ListTile(
-                    leading: const Icon(Icons.palette_outlined, color: brandGreen),
+                    leading:
+                        const Icon(Icons.palette_outlined, color: brandGreen),
                     title: const Text('المظهر (الوضع الليلي)'),
                     subtitle: Text(
                       store.themeMode == ThemeMode.dark
@@ -107,6 +111,58 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const Divider(),
+                  SwitchListTile(
+                    secondary: const Icon(Icons.notifications_active_outlined,
+                        color: brandGreen),
+                    title: const Text('تنبيهات الأذكار اليومية'),
+                    subtitle: const Text('تذكير بأذكار الصباح والمساء'),
+                    value: store.remindersEnabled,
+                    activeThumbColor: brandGreen,
+                    onChanged: (_) => store.toggleReminders(),
+                  ),
+                  if (store.remindersEnabled) ...[
+                    ListTile(
+                      leading: const Icon(Icons.wb_sunny_outlined,
+                          color: brandGreen),
+                      title: const Text('موعد تذكير أذكار الصباح'),
+                      subtitle: Text(
+                          '${store.morningReminderHour.toString().padLeft(2, '0')}:${store.morningReminderMinute.toString().padLeft(2, '0')} صباحاً'),
+                      trailing: const Icon(Icons.edit_outlined, size: 20),
+                      onTap: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(
+                            hour: store.morningReminderHour,
+                            minute: store.morningReminderMinute,
+                          ),
+                        );
+                        if (picked != null) {
+                          store.setMorningReminder(picked.hour, picked.minute);
+                        }
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.nights_stay_outlined,
+                          color: brandGreen),
+                      title: const Text('موعد تذكير أذكار المساء'),
+                      subtitle: Text(
+                          '${(store.eveningReminderHour > 12 ? store.eveningReminderHour - 12 : store.eveningReminderHour).toString().padLeft(2, '0')}:${store.eveningReminderMinute.toString().padLeft(2, '0')} مساءً'),
+                      trailing: const Icon(Icons.edit_outlined, size: 20),
+                      onTap: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(
+                            hour: store.eveningReminderHour,
+                            minute: store.eveningReminderMinute,
+                          ),
+                        );
+                        if (picked != null) {
+                          store.setEveningReminder(picked.hour, picked.minute);
+                        }
+                      },
+                    ),
+                  ],
                   const SizedBox(height: 10),
                 ],
               ),
@@ -121,6 +177,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final hijriDate = HijriDate.fromDate(DateTime.now()).formatFull();
 
     final sections = [
       _Section(
@@ -165,6 +222,18 @@ class HomePage extends StatelessWidget {
         ),
       ),
       _Section(
+        'أذكار الاستيقاظ',
+        Icons.alarm,
+        () => open(
+          context,
+          DhikrListScreen(
+            title: 'أذكار الاستيقاظ',
+            items: wakeUpAdhkar,
+            store: store,
+          ),
+        ),
+      ),
+      _Section(
         'أذكار بعد الصلاة',
         Icons.mosque_outlined,
         () => open(
@@ -175,6 +244,47 @@ class HomePage extends StatelessWidget {
             store: store,
           ),
         ),
+      ),
+      _Section(
+        'الرقية الشرعية',
+        Icons.health_and_safety_outlined,
+        () => open(
+          context,
+          DhikrListScreen(
+            title: 'الرقية الشرعية',
+            items: ruqyahAdhkar,
+            store: store,
+          ),
+        ),
+      ),
+      _Section(
+        'تفريج الكرب والهم',
+        Icons.shield_outlined,
+        () => open(
+          context,
+          DhikrListScreen(
+            title: 'أدعية تفريج الكرب والهم',
+            items: distressAdhkar,
+            store: store,
+          ),
+        ),
+      ),
+      _Section(
+        'أذكار المسجد',
+        Icons.door_front_door_outlined,
+        () => open(
+          context,
+          DhikrListScreen(
+            title: 'أذكار المسجد',
+            items: mosqueAdhkar,
+            store: store,
+          ),
+        ),
+      ),
+      _Section(
+        'أذكاري الخاصة',
+        Icons.edit_note,
+        () => open(context, CustomAdhkarScreen(store: store)),
       ),
       _Section(
         'المفضلة',
@@ -236,14 +346,22 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 7),
-              Text(
-                'اجعل لسانك عامراً بذكر الله',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
-                ),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today_outlined,
+                      size: 16, color: brandGold),
+                  const SizedBox(width: 6),
+                  Text(
+                    hijriDate,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? brandGold : const Color(0xFF997519),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -266,7 +384,7 @@ class HomePage extends StatelessWidget {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      'ابدأ يومك بذكر الله',
+                      'ألا بذكر الله تطمئن القلوب',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 21,
@@ -275,7 +393,7 @@ class HomePage extends StatelessWidget {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      'أذكار موثقة، وعدادات تساعدك على المتابعة',
+                      'أذكار وأدعية مأثورة موثقة بالسند، وعدادات تعينك على الذكر',
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
@@ -286,13 +404,13 @@ class HomePage extends StatelessWidget {
                 children: [
                   const Expanded(
                     child: Text(
-                      'أقسام التطبيق',
+                      'أقسام الأذكار',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Text(
-                    '٧ أقسام',
+                    '${sections.length} أقسام',
                     style: TextStyle(
                       color:
                           isDark ? Colors.grey.shade400 : Colors.grey.shade600,

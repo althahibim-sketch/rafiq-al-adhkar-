@@ -57,6 +57,7 @@ void main() {
     expect(find.text('إعدادات التطبيق'), findsOneWidget);
     expect(find.text('الاهتزاز التفاعلي'), findsOneWidget);
     expect(find.text('حجم خط الأذكار'), findsOneWidget);
+    expect(find.text('تنبيهات الأذكار اليومية'), findsOneWidget);
   });
 
   testWidgets('Search button opens search and filters adhkar', (
@@ -74,5 +75,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('سيد الاستغفار'), findsWidgets);
+  });
+
+  testWidgets('Can add custom dhikr in CustomAdhkarScreen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const RafiqApp());
+    await tester.pumpAndSettle();
+
+    // Scroll to Custom Adhkar
+    final customSection = find.text('أذكاري الخاصة');
+    await tester.ensureVisible(customSection);
+    await tester.pumpAndSettle();
+    await tester.tap(customSection);
+    await tester.pumpAndSettle();
+
+    expect(find.text('لم تضف أي ذكر مخصص بعد'), findsOneWidget);
+
+    // Tap FAB to add
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    // Fill form
+    final titleField = find.byWidgetPredicate((w) =>
+        w is TextField && w.decoration?.labelText == 'عنوان الذكر *');
+    final textField = find.byWidgetPredicate((w) =>
+        w is TextField && w.decoration?.labelText == 'نص الذكر أو الدعاء *');
+
+    await tester.enterText(titleField, 'دعاء خاص');
+    await tester.enterText(textField, 'اللهم وفقني لما تحب وترضى');
+    await tester.tap(find.text('حفظ الذكر'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('دعاء خاص'), findsOneWidget);
   });
 }
